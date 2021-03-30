@@ -1,0 +1,37 @@
+trigger: none
+pr:
+  - master
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+ - stage: Validating
+   displayName: 'Verifying...'
+   jobs:
+    - job: TestingChangelog
+      steps:
+      
+       - script: docker-compose up -d
+         displayName: 'Building Docker'
+
+       - script: docker-compose run --rm liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" update
+         displayName: 'Testing Deploying to empty db'
+         
+       - task: DownloadSecureFile@1
+         name: cnn_dev_database
+         inputs:
+          secureFile: liquibase.properties
+
+       - script: docker-compose run --rm -v $(cnn_dev_database.secureFilePath):/liquibase/changelog/liquibase.properties liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" status --verbose
+         displayName: 'Liquibase Status'
+
+       - script: docker-compose run --rm -v $(cnn_dev_database.secureFilePath):/liquibase/changelog/liquibase.properties liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" updateSQL > update.sql
+         displayName: 'Generating Update SQL'
+
+       - publish: $(System.DefaultWorkingDirectory)/update.sql
+         artifact: update_sql
+
+
+
+  

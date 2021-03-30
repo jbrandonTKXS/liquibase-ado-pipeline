@@ -1,0 +1,11 @@
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.10.xsd ">
+    
+    <includeAll path="build/" relativeToChangelogFile="true"/>
+    <includeAll path="code/" relativeToChangelogFile="true"/>
+
+    <includeAll path="data/" relativeToChangelogFile="true"/>
+    <includeAll path="verify/" relativeToChangelogFile="true"/>
+</databaseChangeLog>

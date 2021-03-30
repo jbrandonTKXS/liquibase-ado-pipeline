@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+  db:
+    image: postgres:latest
+    hostname: db
+    ports:
+      - 5435:5432
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+
+  liquibase: 
+    image: liquibase/liquibase:4.2
+    hostname: liquibase
+    volumes:
+    - ./:/liquibase/changelog/

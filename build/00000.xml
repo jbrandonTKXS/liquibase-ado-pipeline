@@ -1,0 +1,23 @@
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.10.xsd ">
+
+    <changeSet  author="jbrandon"  id="1">  
+        <sql>
+          CREATE TABLE users (
+            id serial
+            ,login text unique
+            ,first_name text
+            ,last_name text
+            ,birth_date date
+            ,hire_date date
+            ,terminate_timestamp timestamp
+            ,department_id int
+            ,manager_id int
+            ,phone_number text
+          )
+          ;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

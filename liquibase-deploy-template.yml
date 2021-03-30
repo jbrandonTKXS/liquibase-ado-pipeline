@@ -1,0 +1,58 @@
+parameters:
+  - name: defaultsFileName
+    type: string
+  - name: masterChangeLog
+    type: string
+  - name: classpath
+    type: string
+  - name: env
+    type: string
+  - name: previewOnly
+    type: string
+
+steps:
+
+  - task: DownloadSecureFile@1
+    name: defaultsFile
+    inputs:
+      secureFile: ${{ parameters.defaultsFileName}}
+
+  - download: current
+    artifact: changelogs
+
+  - script: docker pull liquibase/liquibase:4.2
+    displayName: 'Getting Liquibase Container'
+
+  - script: |
+            docker run --rm \
+            -v $(Agent.BuildDirectory)/changelogs/:/liquibase/changelogs/ \
+            -v $(Agent.TempDirectory)/:/_temp_secrets/ \
+            liquibase/liquibase:4.2 \
+            --defaultsFile /_temp_secrets/${{ parameters.defaultsFileName }} \
+            --classpath /liquibase/changelogs \
+            status --verbose
+    displayName: 'Status Check'
+
+  - script: |
+            docker run --rm \
+            -v $(Agent.BuildDirectory)/changelogs/:/liquibase/changelogs/ \
+            -v $(Agent.TempDirectory)/:/_temp_secrets/ \
+            liquibase/liquibase:4.2 \
+            --defaultsFile /_temp_secrets/${{ parameters.defaultsFileName }} \
+            --classpath /liquibase/changelogs \
+            updateSQL > update.sql
+    displayName: 'Generate SQL'
+    
+  - publish: $(System.DefaultWorkingDirectory)/update.sql
+    artifact: ${{ parameters.env }}_update.sql
+
+  - script: |
+            docker run --rm \
+            -v $(Agent.BuildDirectory)/changelogs/:/liquibase/changelogs/ \
+            -v $(Agent.TempDirectory)/:/_temp_secrets/ \
+            liquibase/liquibase:4.2 \
+            --defaultsFile /_temp_secrets/${{ parameters.defaultsFileName }} \
+            --classpath /liquibase/changelogs \
+            update
+    displayName: 'Deploying'
+    condition:  eq('${{ parameters.previewOnly }}', 'No')
