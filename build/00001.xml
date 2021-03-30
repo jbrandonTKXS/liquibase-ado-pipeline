@@ -1,0 +1,30 @@
+<databaseChangeLog 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.10.xsd ">
+
+    <changeSet  author="jbrandon"  id="1">  
+        <sql>
+          INSERT INTO users(
+            login
+            ,first_name
+            ,last_name
+            ,birth_date
+            ,hire_date 
+            ,department_id
+            ,manager_id
+            ,phone_number
+          )
+          VALUES
+            ('jdow'
+            ,'John'
+            ,'Dow'
+            ,'1/1/1982'
+            ,'2/15/2019'
+            ,1
+            ,NULL
+            ,'765-234-1231')
+          ;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
