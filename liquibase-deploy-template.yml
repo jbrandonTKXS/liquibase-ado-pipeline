@@ -40,10 +40,10 @@ steps:
             liquibase/liquibase:4.2 \
             --defaultsFile /_temp_secrets/${{ parameters.defaultsFileName }} \
             --classpath /liquibase/changelogs \
-            updateSQL > update.sql
+            updateSQL > ${{ parameters.env }}_update.sql
     displayName: 'Generate SQL'
     
-  - publish: $(System.DefaultWorkingDirectory)/update.sql
+  - publish: $(System.DefaultWorkingDirectory)/${{ parameters.env }}_update.sql
     artifact: ${{ parameters.env }}_update.sql
 
   - script: |
