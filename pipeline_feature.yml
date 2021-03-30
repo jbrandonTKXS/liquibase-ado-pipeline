@@ -33,7 +33,7 @@ stages:
        - script: docker-compose run --rm -v $(cnn_dev_database.secureFilePath):/liquibase/changelog/liquibase.properties liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" updateSQL > update.sql
          displayName: 'Generating Update SQL'
 
-       - publish: $(System.DefaultWorkingDirectory)/updateSQL.sql
+       - publish: $(System.DefaultWorkingDirectory)/update.sql
          artifact: feature_update_preview
 
 
