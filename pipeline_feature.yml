@@ -5,37 +5,42 @@ pr:
 pool:
   vmImage: ubuntu-latest
 
-variables:
-  - name: devEnvSecrets
-    value: fmc_view_data_db_dev
-
 stages:
  - stage: Validating
    displayName: 'Verifying...'
    jobs:
-    - job: TestingChangelog
+    - job: TestingFullBuild
       steps:
       
        - script: docker-compose up -d
-         displayName: 'Building Docker'
+         displayName: 'Full Build - Starting Docker Container'
 
        - script: docker-compose run --rm liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" update
-         displayName: 'Testing Deploying to empty db'
-         
-       - task: DownloadSecureFile@1
-         name: cnn_dev_database
-         inputs:
-          secureFile: $(devEnvSecrets)
+         displayName: 'Full Build - Running Liquibase Update'
+        
+       - script: docker-compose down -v
+         displayName: 'Full Build - Stopping Docker Container'
+
+    - job: TestingMigration
+
+       - checkout: master
+       
+       - script: docker-compose up -d
+         displayName: 'Migration - Starting Docker Container'
+
+       - script: docker-compose run --rm liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" update
+         displayName: 'Migration - Update DB To Master'
+
+       - checkout: self
 
        - script: docker-compose run --rm -v $(cnn_dev_database.secureFilePath):/liquibase/changelog/liquibase.properties liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" status --verbose
-         displayName: 'Liquibase Status'
+         displayName: 'Migration - Feature Liquibase Status'
 
        - script: docker-compose run --rm -v $(cnn_dev_database.secureFilePath):/liquibase/changelog/liquibase.properties liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" updateSQL > update.sql
-         displayName: 'Generating Update SQL'
+         displayName: 'Migration - Generating Update SQL'
+
+       - script: docker-compose run --rm -v $(cnn_dev_database.secureFilePath):/liquibase/changelog/liquibase.properties liquibase /liquibase/liquibase --defaultsFile "changelog/liquibase.properties" update
+         displayName: 'Migration - Update DB To Feature'
 
        - publish: $(System.DefaultWorkingDirectory)/update.sql
          artifact: feature_update_preview
-
-
-
-  
